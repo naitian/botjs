@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "node-persist": "0.0.11",
+    "rebirth": "^0.2.3",
     "string-argv": "0.0.2"
   }
 }

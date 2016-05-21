@@ -1,6 +1,7 @@
 'use strict';
 var splitargs = require('string-argv');
 var storage = require('node-persist');
+var rebirth = require('rebirth');
 
 module.exports = class Bot {
 
@@ -93,9 +94,12 @@ module.exports = class Bot {
 
   sendMessage(message, threadID, callback) {
     this.botAPI.api.sendMessage(message, threadID, (err) => {
-      if(err)
+      if(err) {
+        if (err.error === 'JSON.parse error. Check the `detail` property on this error.')
+          rebirth();
         return console.error(err);
-      else if(callback)
+      }
+      if(callback)
         return callback(err);
     });
   }
