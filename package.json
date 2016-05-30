@@ -1,6 +1,6 @@
 {
   "name": "botjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Helper class for facebook bots",
   "main": "bot.js",
   "scripts": {

@@ -181,6 +181,9 @@ module.exports = class Bot {
         console.log('\tRetrieved Group Data');  
         res.participantIDs.forEach((val) => {
           storage.getItem('users', (err, users) => {
+            if (!users) {
+              users = {};
+            }
             if (!users[threadID][val]) {
               users[threadID][val] = {};
               users[threadID][val].names = new Set();
