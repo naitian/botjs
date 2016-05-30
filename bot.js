@@ -1,7 +1,6 @@
 'use strict';
 var splitargs = require('string-argv');
 var storage = require('node-persist');
-var rebirth = require('rebirth');
 
 module.exports = class Bot {
 
@@ -44,7 +43,7 @@ module.exports = class Bot {
 
     this.botAPI.api.listen(function(err, event) {
       if(err)
-        return console.error(err);
+        return console.trace(err);
 
       this.run(event.body, event);
          
@@ -94,12 +93,9 @@ module.exports = class Bot {
 
   sendMessage(message, threadID, callback) {
     this.botAPI.api.sendMessage(message, threadID, (err) => {
-      if(err) {
-        if (err.error === 'JSON.parse error. Check the `detail` property on this error.')
-          rebirth();
-        return console.error(err);
-      }
-      if(callback)
+      if(err)
+        return console.trace(err);
+      else if(callback)
         return callback(err);
     });
   }
@@ -109,27 +105,27 @@ module.exports = class Bot {
     storage.getItem('users', (err, users) => {
       if (!users || !users[threadID]) {
         this.cacheUserList(threadID);
-        this.botAPI.api.getThreadInfo(threadID, (err, res) => {
-          if(err)
-            return console.error(err);
-          else {
-            let pid = res.participantIDs;
-            for (var i = 0; i < pid.length; i++) {
-              this.botAPI.api.getUserInfo(pid[i], (err, res) => {
-                if(err)
-                  return console.error(err);
-                else {
-                  let id = Object.keys(res)[0];
-                  res = res[Object.keys(res)[0]];
-                  res.id = id;
-                  if(res.name.toLowerCase().indexOf(name.toLowerCase()) > -1) {
-                    callback(null, res);
-                  }
-                }
-              });
-            }
-          }
-        }); 
+        // this.botAPI.api.getThreadInfo(threadID, (err, res) => {
+        //   if(err)
+        //     return console.trace(err);
+        //   else {
+        //     let pid = res.participantIDs;
+        //     this.botAPI.api.getUserInfo(pid, (err, res) => {
+        //       if(err)
+        //         return console.trace(err);
+        //       else {
+        //         for (let id in res) {
+        //           let user = res[id];
+        //           user.id = id;
+        //           if(user.name.toLowerCase().indexOf(name.toLowerCase()) > -1) {
+        //             callback(null, res);
+        //           }
+        //         } 
+        //       }
+              
+        //     });
+        //   }
+        // }); 
       } else {
         const thread = users[threadID];
         let possible = [];
@@ -165,7 +161,7 @@ module.exports = class Bot {
       return;
     this.botAPI.api.removeUserFromGroup(userID, threadID, (err) => {
       if (err)
-        return console.error(err);
+        return console.trace(err);
       setTimeout(() => {
         this.botAPI.api.addUserToGroup(userID, threadID, (err) => {
           if (callback)
@@ -178,19 +174,13 @@ module.exports = class Bot {
   fillUserInfo(threadID) {
     storage.getItem('users', (err, users) => {
       if (err)
-        return console.error(err);
+        return console.trace(err);
       this.botAPI.api.getThreadInfo(threadID, (err, res) => {
         if (err)
-          return console.error(err);
+          return console.trace(err);
         console.log('\tRetrieved Group Data');  
         res.participantIDs.forEach((val) => {
           storage.getItem('users', (err, users) => {
-            if (!users) {
-              users = {};
-            }
-            if (!users[threadID]) {
-              users[threadID] = {};
-            }
             if (!users[threadID][val]) {
               users[threadID][val] = {};
               users[threadID][val].names = new Set();
@@ -204,7 +194,7 @@ module.exports = class Bot {
 
             this.botAPI.api.getUserInfo(val, (err, user) => {
               if (err)
-                return console.error(err);
+                return console.trace(err);
               users[threadID][val].names.add(user[val].name);
               users[threadID][val].names = Array.from(users[threadID][val].names);
               users[threadID][val].account = user[val];
@@ -222,7 +212,7 @@ module.exports = class Bot {
     storage.getItem('users', (err, users) => {
       console.log('\tRetrieved Users Object');
       if (err)
-        return console.error(err);
+        return console.trace(err);
       if (!users) {
         users = {};
         users[threadID] = {};
@@ -261,7 +251,7 @@ module.exports = class Bot {
         let val = this.tests[key];
         this.run(val.message, val.event);
       } catch (err) {
-        console.error(err);
+        console.trace(err);
       }
     });
   }
